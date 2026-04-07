@@ -1,29 +1,34 @@
-import { useState, useEffect } from 'react';
-
-export default function Check() {
-  const [isOnline, setIsOnline] = useState(true);
-  useEffect(() => {
-    function handleOnline() {
-      setIsOnline(true);
+import { useEffect, useState } from 'react'
+import type { Todo } from './type'
+function Check() {
+    const [todos, setTodos] = useState <Todo[] | null>(null)
+    const [loading, setLoading] = useState(true)
+    useEffect(() => {
+        const fetchData = async () => {
+            const res =  await fetch('https://jsonplaceholder.typicode.com/todos')
+            const data = await res.json()
+            setTodos(data)
+            setLoading(false)
+        }
+        fetchData()
+    }, [])
+  
+    if (loading) {
+        return <h1>Loading...</h1>
     }
-    function handleOffline() {
-      setIsOnline(false);
-    }
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  function handleSaveClick() {
-    console.log('✅ Progress saved');
-  }
-
-  return (
-    <button disabled={!isOnline} onClick={handleSaveClick}>
-      {isOnline ? 'Save progress' : 'Reconnecting...'}
-    </button>
-  );
+    return (
+        <>
+        
+        <ul>
+            {todos && todos.length > 0 ?  
+            todos?.map( todo => {
+                return (
+                    <li key={todo.id}>{todo.title}</li>
+                ) }) 
+                : <h1>No todos yet</h1>}
+        </ul>
+        </>
+    )
 }
+
+export default Check
